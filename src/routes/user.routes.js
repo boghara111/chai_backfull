@@ -5,6 +5,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router()
 
+//middleware
 router.route("/register").post(
     upload.fields([
         {
@@ -17,7 +18,11 @@ router.route("/register").post(
         }
     ]),    
     registerUser)
-// router.route("/login").post(login)
+
+router.route("/login").post(login)
+
+    // sercure routes
+router.route("/logout").post(verifyJWT,logoutUser)
 
 
 export default router
