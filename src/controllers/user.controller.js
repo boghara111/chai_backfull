@@ -122,7 +122,7 @@ const loginUser = asyncHandler(async(req,res) => {
         throw new ApiError(401,"Invalid User credentials")  
     }
 
-    const  {accessToken,refreshToken} = await generateAccessAndRefreshToken(user._id)
+    const {accessToken,refreshToken} = await generateAccessAndRefreshToken(user._id)
 
     //below line meaning the password or refresh tooken login time no avava joy
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")   
@@ -153,7 +153,7 @@ const logoutUser = asyncHandler(async(req,res) => {
         req.user._id,
         {
             $set: {
-                refreshToken: undefined
+                refreshToken: 1  //This removes the field from documents
             }
         },
         {
@@ -185,7 +185,7 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
             incomingRefreshToken,
             process.env.REFRESH_TOKEN_SECRET
         )
-    
+        
         const user = await User.findById(decodedToken._id?._id)
     
         if(!user){
@@ -220,7 +220,7 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
 })
 
 const changeCurrentPassword = asyncHandler(async(req,res) => {
-    const {currentPassword,newPassword} = req.body
+    const {oldPassword,newPassword} = req.body
 
     const user = await User.findById(req.user?._id)
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
@@ -248,7 +248,7 @@ const getCurrentUser = asyncHandler(async(req, res) => {
     ))
 })
 
-const udateAccountDetails = asyncHandler(async(req,res) => {
+const updateAccountDetails = asyncHandler(async(req,res) => {
     const {fullName,email} =req.body
     if(!fullName || !email){
         throw new ApiError(400,"All fields are required")
@@ -264,7 +264,7 @@ const udateAccountDetails = asyncHandler(async(req,res) => {
         },  
         {new: true}
     ).select("-password ")
- 
+    
     return res
     .status(200)
     .json(new ApiResponse(200,user,"Account details updated successfully"))
@@ -441,6 +441,7 @@ const getWatchHistory = asyncHandler(async(req,res) => {
 })
 
 
+
 export {
     registerUser,
     loginUser,
@@ -448,7 +449,7 @@ export {
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
-    udateAccountDetails,
+    updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
     getUserChanelProfile,
